@@ -1,7 +1,7 @@
 # Advanced Lane Finding Project  
   
   
-![Alt text](/output_images/result.png?raw=true "result")
+![Alt text](https://github.com/ablacklama/Advanced-Lane-Finding/blob/master/output_images/Output.png?raw=true "result")
 
 
 ## Intro
