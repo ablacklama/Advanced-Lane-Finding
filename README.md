@@ -48,42 +48,29 @@ I then saved the distortion matrix in a pickle file so I could quickly load it.
 
   
 ### 1. Convert to ImageClass 
-The [`ImageClass`]('image_class.py') I created for this project was really where the majority of my work went. It's also where almost all the complecated functions are.
-  
-### 2. Lane Finding  
-  
-I used two approaches to find lane lines.  
-a **Gradient** approach and a **Color** approach.
-The code for lane finding step is contained in the [`threshold.py`](threshold.py).  
+The [`ImageClass`]('image_class.py') I created for this project was really where the majority of my work went. It's also where almost all the complecated functions are. Each function (besides the find_lane functions) operates on the image stored in the class and returns a new ImageClass with the new image stored in it.
 
-In gradient approach, I applied Sobel operator in the x, y directions. And calculated magnitude of the gradient in both the x and y directions and direction of the gradient. I used red channel of RGB instead of grayscaled image.  
-And I combined them based on this code :  
-  
-`gradient_comb[((sobelx>1) & (mag_img>1) & (dir_img>1)) | ((sobelx>1) & (sobely>1))] = 255`  
-    
-<p align="center">
-    <img src="images/gradient.jpg" width="640" alt="gradient" /><br>
-</p>  
-  
+The Functions are:
+* `undistort`: undistorts an image
+* `imshow` : display and image with a set title
+* `GaussianBlur` : apply gaussian blur with set kernal size
+* `format` : change image format (rgb, hls, hsv, gray). Can also narrow down to one image channel (i.e. l from hls)
+* `sobel_thresh : produce binary image with threshold of sobel operation along specified axis
+* `dir_threshold` : produce binary image of sobel direction between threshold values
+* `mag_thresh` : produce binary image of sobel magnitude between threshold values
+* `andImg` : preform bitwise 'and' opperation on binary image
+* `orImg` : preform bitwise 'or' opperation on binary image
+* `transform` : transform perspective to aerial view
+* `ROI` : narrows image down to a region-of-interest
+* `binary_warp` : uses previous class functions to turn rgb image into warped binary image
+* `find_lanes` : finds lane line coefficients and points using windowed search
+* `find_lines_with_lines` : finds lane line coefficients and points based on previus coefficients
 
-In Color approach, I used red channel of RGB Color space and H,L,S channel of HSV Color space. Red color(255,0,0) is included in white(255,255,255) and yellow(255,255,0) color. That's way I used it. Also I used HLS Color space because we could be robust in brightness.  
-I combined them based on this code :  
-
-`hls_comb[((s_img>1) & (l_img == 0)) | ((s_img==0) & (h_img>1) & (l_img>1)) | (R>1)] = 255`  
+Building a class like this (starting with the basic functions and working up) let me make more complex functions like `binary_warp` in building block style. 
   
-With this method, I could eliminate unnecessary shadow information.  
-
-<p align="center">
-    <img src="images/color.jpg" width="640" alt="color" /><br>
-</p>  
+### 2. Undistort the Image  
   
-  
-This is combination of color and gradient thresholds.  
-
-<p align="center">
-    <img src="images/combination.jpg" width="640" alt="combination" /><br>
-</p>  
-  
+TODO
   
 ### 3. Perspective Transform  
   
