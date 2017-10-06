@@ -149,19 +149,36 @@ Finally I merge `magdir` and `lsxy` to with the `or` opperation to create the `b
   
 Here I use my `transform` function and openCV's `getPerspectiveTransform` to change the perspective of the image to top down. This makes finding the lines and calculating the curvature much easier.
 
-#### Lane Info
-* estimate lane status that is a straight line, or left/right curve. To decide this, I considered a radius of curvature and a curve direction.  
-  
-#### Curvature
-* for calculating a radius of curvature in real world, I used U.S. regulations that require a minimum lane width of 3.7 meters. And assumed the lane's length is about 30m.  
-  
-#### Deviation
-* Estimated current vehicle position by comparing image center with center of lane line.  
+#### Finding Lines
+To find the lines I took a histogram of the bottom half of the warped image to show which points on the x axis had the most white points along their 'y' axis.
 
-#### Mini road map
-* The small mini map visualizes above information.
+<p align="center">
+    <img src="output_images/BottomHalf.png?raw=true" width="480" alt="bottom half" /><br>
+</p>  
+<p align="center">
+    <img src="output_images/Histogram.png?raw=true" width="480" alt="histogram" /><br>
+</p>  
+  
+ I used the highest points on either side of the middle of the histogram as my starting points to find the lane. Finding points on the lane was done with a windowed search that moved left or right depending on where it last found the most points. This allowed it to follow the curve of the lane.
+ 
+ <p align="center">
+    <img src="output_images/Windows.png?raw=true" width="480" alt="windowed search" /><br>
+</p>  
+ 
+ Then I fit a line to the points on each lane.
+ 
+ <p align="center">
+    <img src="output_images/WindowsLines.png?raw=true" width="480" alt="fitted lines" /><br>
+</p>  
+ 
+ All of this information was saved in a [`line_class.py`](line_class.py) that I used to keep track of all line information. Knowing where the last lines were allowed me to quickly search for them again in the next frame without having to do a windowed search. This speeds up processing considerably, and if you ever don't find a line with this approach, you can always go back to a windowed search.
+ 
+#### Computing the Radius of the Curvature 
+I assumed here that the lane I found was roughly 30 Meters in length. Then used their polynomial coefficients to calculated seperate radiuses for each lane.  
+  
+#### Find position of car relative to the lane
+Here used the distance of the center of the car to each lane in pixels as a starting point. Then knowing that a lane is 3.7 meters accross I got the length of every pixel and used it to find how far off center the car was.
 
----
 
 ## Result  
 
