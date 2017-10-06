@@ -105,41 +105,48 @@ class ImageClass:
 
         return ImageClass(img, form='gray')
 
+    #return binary image of sobel direction between thresh values
+    #ksize indicate size of sobel kernals
     def dir_threshold(self, ksize=5, thresh=(.7, 1.3)):
 
         img = self.img
         if (len(img.shape) > 2):
             img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-        # 2) Take the gradient in x and y separately
+        # Take the gradient in x and y separately
         sobel_x = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=ksize)
         sobel_y = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=ksize)
 
-        # 3) Take the absolute value of the x and y gradients
+        # Take the absolute value of the x and y gradients
         abs_sobelx = np.absolute(sobel_x)
         abs_sobely = np.absolute(sobel_y)
 
-        # 4) Use np.arctan2(abs_sobely, abs_sobelx) to calculate the direction of the gradient
+        # calculate the direction of the gradient
         grad_dir = np.arctan2(abs_sobely, abs_sobelx)
 
-        # 5) Create a binary mask where direction thresholds are met
+        # Create a binary mask where direction thresholds are met
         grad_binary = np.zeros_like(grad_dir)
         grad_binary[(grad_dir >= thresh[0]) & (grad_dir <= thresh[1])] = 1
         img = grad_binary
         return ImageClass(img, form='gray')
 
+    #returns binary image of sobel magnitude between mag_thresh values
+    #ksize sets size of sobel kernals
     def mag_thresh(self, ksize=5, mag_thresh=(50, 255)):
 
         img = self.img
-
+        #if not grey image, convert to grey
         if len(img.shape) > 2:
             img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
+        #perform sobel operation on image in both directions
         abs_sobelx = np.absolute(cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=ksize))
         abs_sobely = np.absolute(cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=ksize))
 
+        #get magnitude of all points
         sobel_mag = np.sqrt((abs_sobelx ** 2) + (abs_sobely ** 2))
 
+        #scale magnitude to range of 0-255
         scale_factor = np.max(sobel_mag) / 255
         sobel_scaled = (sobel_mag / scale_factor).astype(np.uint8)
 
@@ -164,11 +171,13 @@ class ImageClass:
         if (np.max(img1) > 1) | (np.max(img2) > 1):
             raise Exception("and operation doesn't work on non-binary images")
 
+        #create image where all shared white pixels are set to 1
         output = np.zeros_like(img1)
         output[(img1 == 1) & (img2 == 1)] = 1
         img = output
         return ImageClass(img=img, form='gray')
 
+    # produce a picture from all places where either binary picture has a value of 1
     def orImg(self, img2):
         if type(self.img) == type(None):
             raise Exception("class doesn't contain an image")
@@ -182,14 +191,19 @@ class ImageClass:
         if (np.max(img1) > 1) | (np.max(img2) > 1):
             raise Exception("or operation doesn't work on non-binary images")
 
+        # create image where all white pixels from either image are set to 1
         output = np.zeros_like(img1)
         output[(img1 == 1) | (img2 == 1)] = 1
         img = output
         return ImageClass(img=img, form='gray')
 
+    #transform perspective to aerial view
+    #src is the source points for the transform, dst is the destination points
+    #returns image and inverse transformation matrix
     def transform(self, src=None, dst=None, img_size=(1280,720)):
         img = self.img
 
+        #use default transformation points if non were passed
         if not src:
             src = np.float32([[696, 455],
                              [1096, 719],
@@ -201,8 +215,11 @@ class ImageClass:
                              [350, 719],
                              [350, 0]])
 
+        #get transformation matrix
         M = cv2.getPerspectiveTransform(src, dst)
+        #get inverse transformation matrix
         Minv = cv2.getPerspectiveTransform(dst, src)
+        #warp perspective
         warped = cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_LINEAR)
         output = ImageClass(warped)
         return output, Minv
@@ -210,6 +227,8 @@ class ImageClass:
     def ROI(self, vertices=None):
         img = self.img
         imshape = (img.shape[1], img.shape[0])
+
+        #make default vertices if none was passed
         if type(vertices) == type(None):
             vertices = np.array([[(0, imshape[1]),
                                 (int(imshape[0] * .45), int(imshape[1] * .5)),
@@ -235,10 +254,15 @@ class ImageClass:
         output = ImageClass(masked_image, form=self.form)
         return output
 
+    #uses class functions to turn rgb image into warped binary image
+    #returns the image and inverse transformation matrix
+    #if visualize is True, function will show images at every step of the process
     def binary_warp(self,visualize=False):
 
+        #apply Gaussian Blur
         blur = self.GaussianBlur(ksize=5)
 
+        #Create new grey images using only one hls channel
         l = blur.format('hls', 'l')
         s = blur.format('hls', 's')
 
@@ -277,15 +301,22 @@ class ImageClass:
 
         return binary_warped, Minv
 
+    #find the coefficients for the left and right lines and return them along with the indices of all points on them
+    #margin sets the number of pixels to the left and right of the base of each line that will be included in the window
+    #minpix is the number of pixels a window must have to be accepted as part of the line
     def find_lines(self, margin=100, minpix=300, visualize=False):
         img = self.img
         if visualize:
             out_img = np.dstack((img, img, img)) * 255
         shape = img.shape
+
+        #narrow image down to only bottom half
         bottom = img[int(shape[0] / 2):, :]
 
+        #create histogram of frequency of points along the y axis to find starting place for search
         hist = np.sum(bottom, axis=0)
 
+        #find base of windows
         middle = np.int(shape[1] / 2)
         leftx_base = np.argmax(hist[:middle])
         rightx_base = np.argmax(hist[middle:]) + middle
@@ -306,12 +337,12 @@ class ImageClass:
         # Create empty lists to receive left and right lane pixel indices
         left_lane_inds = []
         right_lane_inds = []
-        detected = False
+
         for window in range(nwindows):
 
+            #find points for window rectangles
             win_y_low = shape[0] - ((window + 1) * window_height)
             win_y_high = shape[0] - (window * window_height)
-
             win_xleft_low = leftx_current - margin
             win_xleft_high = leftx_current + margin
             win_xright_low = rightx_current - margin
@@ -335,6 +366,7 @@ class ImageClass:
             left_lane_inds.append(good_left_inds)
             right_lane_inds.append(good_right_inds)
 
+            #if the window had enough pixels in it, add it to the array
             if (len(good_left_inds) > minpix):
                 leftx_current = np.int(np.mean(nonzerox[good_left_inds]))
             if (len(good_right_inds) > minpix):
@@ -375,11 +407,14 @@ class ImageClass:
             plt.ylim(720, 0)
 
         return left_fit, right_fit, leftx, rightx, lefty, righty
+
+    # find the coefficients for the left and right lines and return them along with the indices of all points on them
+    # margin sets the number of pixels to the left and right of the base of each line that will be included in the window
+    # function must take already fitted lines produced by "find_lines"
     def find_lines_with_lines(self, left_fit, right_fit, margin=100, visualize=False):
         img = self.img
-        # Assume you now have a new warped binary image
-        # from the next frame of video (also called "binary_warped")
-        # It's now much easier to find line pixels!
+
+        #find all non zero pixels within the fitted lanes
         nonzero = img.nonzero()
         nonzeroy = np.array(nonzero[0])
         nonzerox = np.array(nonzero[1])
