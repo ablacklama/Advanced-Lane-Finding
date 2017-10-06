@@ -37,8 +37,8 @@ I then saved the distortion matrix in a pickle file so I could quickly load it.
   
 ## Pipeline
   1. Convert to ImageClass where all the line finding funtions reside.
-  2. Undistort the image.
-  3. Apply Gaussian Blur.
+  2. Undistort the image. 
+  3. Apply Gaussian Blur. 
   4. Convert to binary Image.
   5. Warp perspective to have aerial view of lanes.
   6. Find Lines.
@@ -46,8 +46,13 @@ I then saved the distortion matrix in a pickle file so I could quickly load it.
   8. Find position of car relative to lane.
   9. Draw info on output picture.
 
-  
-### 1. Convert to ImageClass 
+  The pipeline function exists in the [lane finding notebook](LaneFindingP4.ipynb) but most of the functionality of the pipeline exists in the [`image_class.py`](image_class.py). 2-5 exist in the `binary_warp` function and 6 is also a function of the [`image class`](image_class.py).
+### 1. Convert to Image to ImageClass 
+
+<p align="center">
+    <img src="test_images/test7.jpg?raw=true" width="640" alt="Starting image" /><br>
+</p>  
+
 The [`ImageClass`]('image_class.py') I created for this project was really where the majority of my work went. It's also where almost all the complecated functions are. Each function (besides the find_lane functions) operates on the image stored in the class and returns a new ImageClass with the new image stored in it.
 
 The Functions are:
@@ -69,25 +74,21 @@ The Functions are:
 Building a class like this (starting with the basic functions and working up) let me make more complex functions like `binary_warp` in building block style. 
   
 ### 2. Undistort the Image  
-  
-TODO
-  
-### 3. Perspective Transform  
-  
- We can assume the road is a flat plane. Pick 4 points of straight lane lines and apply perspective transform to the lines look straight. It is also called `Bird's eye view`.  
-  
+`ImageClass.undistort(self, mtx, dist)` handled the undistortion for me by calling cv2's undistort method. I'd put an image here but it really looks the same as the input image above because the camera has barely any distortion.
+
+### 3. Gaussian Blur 
 <p align="center">
-    <img src="images/warp.jpg" width="640" alt="warp" /><br>
+    <img src="output_images/GaussianBlur.png?raw=true" width="640" alt="blur" /><br>
 </p>  
 
+After correcting for any camera distorion I want to make the image a little more friendly to the sobel functions. Sobel edgefinding can be sensitive to lots of tiny but still strong edges. We don't really care about tiny edges composed of a few pixels, so I used Gaussian Blur to smooth them out. [Gaussian Blur](https://en.wikipedia.org/wiki/Gaussian_blur) basically just blurs the image using a kernal of a specified size. I choose a kernal size of 5 after seeing no noticable increase in accuracy beyong that size. 
 
-### 4. Sliding Window Search  
-  
-The code for Sliding window search is contained in the [`finding_lines.py`](finding_lines.py) or [`finding_lines_w.py`](finding_lines.py).  
+### 4. Convert to Binary Image
+This is where a lot of the magic happens. I want to convert the image to a black and white image (each pixel either 0 or 1) where only the lanes (in theory) are white. I use my `ImageClass.format` method to create three grey images. One is just a grayed out version of the normal RGB image, but the other two are the 'l' and 's' channels of an 'hls' formatted version of the image. These are the 'lightness' and 'saturation' channels. Both do a good job at identifying certain types of lane lines.
+(NOTE: In the binary_warp code, conversion from rgb to grey is done autimatically by dir_threshold, and mag_thresh functions)
 
-In the video, we could predict the position of lane lines by checking previous frame's information. But we need an other method for a first frame.  
 
-In my code, if the frame is first frame or lost lane position, found first window position using histogram. Just accumulated non-zero pixels along the columns in the lower 2/3 of the image.  
+
 
 <p align="center">
     <img src="images/histogram.jpg" width="320" alt="hist" /><br>
