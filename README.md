@@ -87,12 +87,18 @@ After correcting for any camera distorion I want to make the image a little more
 This is where a lot of the magic happens. I want to convert the image to a black and white image (each pixel either 0 or 1) where only the lanes (in theory) are white. I use my `ImageClass.format` method to create three grey images. One is just a grayed out version of the normal RGB image, but the other two are the 'l' and 's' channels of an 'hls' formatted version of the image. These are the 'lightness' and 'saturation' channels. Both do a good job at identifying certain types of lane lines.
 (NOTE: In the binary_warp code, conversion from rgb to grey is done autimatically by dir_threshold, and mag_thresh functions)
 
+<p align="center'>
+  <p align="left">
+      <img src="output_images/Lchannel.png?raw=true" width="300" alt="L channel" /><br>
+  </p>  
+  <p align="right">
+      <img src="output_images/Schannel.png?raw=true" width="300" alt="S channel" /><br>
+  </p>  
+</p>
+
+I then create two new images (`dir_thresh` and `mag_thresh`) with by taking the directional magnitude and straight magnitude of the gray image.
 
 
-
-<p align="center">
-    <img src="images/histogram.jpg" width="320" alt="hist" /><br>
-</p>  
   
   
 In the course, we estimated curve line by using all non-zero pixels of windows. Non-zero piexels include **color information** and **gradient information** in bird's eyes view binary image. It works well in [`project_video`](project_video.mp4).  
