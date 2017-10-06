@@ -26,30 +26,29 @@ Our goal is to find and label the lane in the video, show the radius of the curv
 
 ## Camera Calibration
 Most cameras have a distorting effect on images they take. This throws off our measurements so we need to correct it. 
-To do this 
+To do this used openCV's camera calibration functions which take images of a chess board at various angles. The function finds the inside corners of the chess board in all the images and computes the distortion matrix that can be applied to images to undistort them.
+I then saved the distortion matrix in a pickle file so I could quickly load it.
 
+[`calibration code`](calibrate.py)
 
 <p align="center">
     <img src="https://github.com/ablacklama/Advanced-Lane-Finding/blob/master/output_images/ChessBoard.png?raw=true" width="640" alt="calib_image" /><br>    
 </p>
   
-## Pipeline  
-  
-<p align="center">
-    <img src="images/process.jpg" alt="process_image" /><br>
-    <b>General Process</b><br>
-</p>
+## Pipeline
+  1. Convert to ImageClass where all the line finding funtions reside.
+  2. Undistort the image.
+  3. Apply Gaussian Blur.
+  4. Convert to binary Image.
+  5. Warp perspective to have aerial view of lanes.
+  6. Find Lines.
+  7. Compute radius of curve.
+  8. Find position of car relative to lane.
+  9. Draw info on output picture.
 
-If an image loaded, we immediately undo distortion of the image using calculated calibration information.
   
-### 1. Crop Image  
-  
-
-<p align="center">
-    <img src="images/crop_img.jpg" width="640" alt="crop" /><br>
-</p>  
-
-In image, a bonnet and background are not necessary to find lane lines. Therefore, I cropped the inconsequential parts.  
+### 1. Convert to ImageClass 
+The [`ImageClass`]('image_class.py') I created for this project was really where the majority of my work went. It's also where almost all the complecated functions are.
   
 ### 2. Lane Finding  
   
