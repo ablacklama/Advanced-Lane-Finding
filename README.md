@@ -182,7 +182,7 @@ Here used the distance of the center of the car to each lane in pixels as a star
 ## Result  
 
  <p align="center">
-    <img src="output_images/Output.png?raw=true" width="480" alt="final image output" /><br>
+    <img src="output_images/Output1.png?raw=true" width="480" alt="final image output" /><br>
 </p>  
   
 ## Reflection  
