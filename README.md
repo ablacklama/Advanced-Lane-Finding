@@ -1,10 +1,8 @@
 # Advanced Lane Finding Project  
   
   
-<p align="center">
-    ![Alt text](output_images/result.jpg?raw=true "result")
-    <b>Example result</b><br>
-</p>
+![Alt text](output_images/result.jpg?raw=true "result")
+
 
 ## Intro
 
