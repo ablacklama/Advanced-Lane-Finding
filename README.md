@@ -1,7 +1,7 @@
 # Advanced Lane Finding Project  
   
   
-![Alt text](output_images/result.jpg?raw=true "result")
+![Alt text](output_images/result.png?raw=true "result")
 
 
 ## Intro
