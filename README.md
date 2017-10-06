@@ -1,7 +1,9 @@
 # Advanced Lane Finding Project  
   
-  
-![Alt text](https://github.com/ablacklama/Advanced-Lane-Finding/blob/master/output_images/Output.png?raw=true "result")
+<p align="center">
+    <img src="https://github.com/ablacklama/Advanced-Lane-Finding/blob/master/output_images/Output.png?raw=true" width="640" alt="calib_image" /><br>    
+</p> 
+
 
 
 ## Intro
@@ -12,8 +14,11 @@ Our goal is to find and label the lane in the video, show the radius of the curv
 ## Files
   
 [`LaneFindingP4.ipynb`](LaneFindingP4.ipynb) : Main project notebook
+
 [`calibrate.py`](calibrate.py) : get calibration matrix and store in pickle file
+
 [`image_class.py`](image_class.py) : Class that stores and performs operations on an image
+
 [`line_class.py`](line_class.py) : store line information and compute curvature
 
 
@@ -25,7 +30,7 @@ To do this
 
 
 <p align="center">
-    <img src="output_images/ChessBoard.jpg" width="640" alt="calib_image" /><br>    
+    <img src="https://github.com/ablacklama/Advanced-Lane-Finding/blob/master/output_images/ChessBoard.png?raw=true" width="640" alt="calib_image" /><br>    
 </p>
   
 ## Pipeline  
