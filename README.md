@@ -108,7 +108,7 @@ I then create two new images (`dir_thresh` and `mag_thresh`) with by taking the 
 After that I use the sobel operation to create 3 new images. The sobel function computes the gradient of change in an image along either the 'x' or 'y' axis. sobel 'x' of 'l' channel image, sobel 'x' of 's' channel image, and sobel 'y' of 's' channel image.
 
 <p align="center">
-    <img src="output_images/Sobelx_L_channel.png?raw=true" width="300" alt="sobel along 'x' axis with 'l' channel" /><br>
+    <img src="output_images/Sobelx_L_Channel.png?raw=true" width="300" alt="sobel along 'x' axis with 'l' channel" /><br>
 </p>  
 <p align="center">
     <img src="output_images/Sobelx_S_channel.png?raw=true" width="300" alt="sobel along 'x' axis with 's' channel" /><br>
@@ -116,6 +116,23 @@ After that I use the sobel operation to create 3 new images. The sobel function 
 <p align="center">
     <img src="output_images/Sobely_S_channel.png?raw=true" width="300" alt="sobel along 'y' axis with 's' channel" /><br>
 </p>
+
+Then I had to combine them all back into one image. I used a series of binary and/or opperations to do this by first combining `dir` and `mag` images in an 'and' operation to create `magdir`. 
+
+<p align="center">
+    <img src="output_images/GradDirMag.png?raw=true" width="300" alt="combined gradient and directional magnitude" /><br>
+</p>
+
+Then I combined `sx` and `sy` with an 'and' opperation to create `sxy`, that image and `lx` were then combine with the 'or' opperation to create `lsxy`. 
+
+<p align="center">
+    <img src="output_images/GradDirMag.png?raw=true" width="300" alt="combined gradient and directional magnitude" /><br>
+</p>
+<p align="center">
+    <img src="output_images/GradDirMag.png?raw=true" width="300" alt="combined gradient and directional magnitude" /><br>
+</p>
+
+Finally I merge `magdir` and `lsxy` to with the `or` opperation to create the `both` image which is then cropped down to a `ROI` or region of interest.
 
 
 
