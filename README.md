@@ -37,8 +37,8 @@ I then saved the distortion matrix in a pickle file so I could quickly load it.
   
 ## Pipeline
   1. Convert to ImageClass where all the line finding funtions reside.
-  2. Undistort the image.
-  3. Apply Gaussian Blur.
+  2. Undistort the image. 
+  3. Apply Gaussian Blur. 
   4. Convert to binary Image.
   5. Warp perspective to have aerial view of lanes.
   6. Find Lines.
@@ -46,65 +46,59 @@ I then saved the distortion matrix in a pickle file so I could quickly load it.
   8. Find position of car relative to lane.
   9. Draw info on output picture.
 
-  
-### 1. Convert to ImageClass 
-The [`ImageClass`]('image_class.py') I created for this project was really where the majority of my work went. It's also where almost all the complecated functions are.
-  
-### 2. Lane Finding  
-  
-I used two approaches to find lane lines.  
-a **Gradient** approach and a **Color** approach.
-The code for lane finding step is contained in the [`threshold.py`](threshold.py).  
-
-In gradient approach, I applied Sobel operator in the x, y directions. And calculated magnitude of the gradient in both the x and y directions and direction of the gradient. I used red channel of RGB instead of grayscaled image.  
-And I combined them based on this code :  
-  
-`gradient_comb[((sobelx>1) & (mag_img>1) & (dir_img>1)) | ((sobelx>1) & (sobely>1))] = 255`  
-    
-<p align="center">
-    <img src="images/gradient.jpg" width="640" alt="gradient" /><br>
-</p>  
-  
-
-In Color approach, I used red channel of RGB Color space and H,L,S channel of HSV Color space. Red color(255,0,0) is included in white(255,255,255) and yellow(255,255,0) color. That's way I used it. Also I used HLS Color space because we could be robust in brightness.  
-I combined them based on this code :  
-
-`hls_comb[((s_img>1) & (l_img == 0)) | ((s_img==0) & (h_img>1) & (l_img>1)) | (R>1)] = 255`  
-  
-With this method, I could eliminate unnecessary shadow information.  
+  The pipeline function exists in the [lane finding notebook](LaneFindingP4.ipynb) but most of the functionality of the pipeline exists in the [`image_class.py`](image_class.py). 2-5 exist in the `binary_warp` function and 6 is also a function of the [`image class`](image_class.py).
+### 1. Convert to Image to ImageClass 
 
 <p align="center">
-    <img src="images/color.jpg" width="640" alt="color" /><br>
+    <img src="test_images/test7.jpg?raw=true" width="640" alt="Starting image" /><br>
 </p>  
-  
-  
-This is combination of color and gradient thresholds.  
 
+The [`ImageClass`]('image_class.py') I created for this project was really where the majority of my work went. It's also where almost all the complecated functions are. Each function (besides the find_lane functions) operates on the image stored in the class and returns a new ImageClass with the new image stored in it.
+
+The Functions are:
+* `undistort`: undistorts an image
+* `imshow` : display and image with a set title
+* `GaussianBlur` : apply gaussian blur with set kernal size
+* `format` : change image format (rgb, hls, hsv, gray). Can also narrow down to one image channel (i.e. l from hls)
+* `sobel_thresh : produce binary image with threshold of sobel operation along specified axis
+* `dir_threshold` : produce binary image of sobel direction between threshold values
+* `mag_thresh` : produce binary image of sobel magnitude between threshold values
+* `andImg` : preform bitwise 'and' opperation on binary image
+* `orImg` : preform bitwise 'or' opperation on binary image
+* `transform` : transform perspective to aerial view
+* `ROI` : narrows image down to a region-of-interest
+* `binary_warp` : uses previous class functions to turn rgb image into warped binary image
+* `find_lanes` : finds lane line coefficients and points using windowed search
+* `find_lines_with_lines` : finds lane line coefficients and points based on previus coefficients
+
+Building a class like this (starting with the basic functions and working up) let me make more complex functions like `binary_warp` in building block style. 
+  
+### 2. Undistort the Image  
+`ImageClass.undistort(self, mtx, dist)` handled the undistortion for me by calling cv2's undistort method. I'd put an image here but it really looks the same as the input image above because the camera has barely any distortion.
+
+### 3. Gaussian Blur 
 <p align="center">
-    <img src="images/combination.jpg" width="640" alt="combination" /><br>
-</p>  
-  
-  
-### 3. Perspective Transform  
-  
- We can assume the road is a flat plane. Pick 4 points of straight lane lines and apply perspective transform to the lines look straight. It is also called `Bird's eye view`.  
-  
-<p align="center">
-    <img src="images/warp.jpg" width="640" alt="warp" /><br>
+    <img src="output_images/GaussianBlur.png?raw=true" width="640" alt="blur" /><br>
 </p>  
 
+After correcting for any camera distorion I want to make the image a little more friendly to the sobel functions. Sobel edgefinding can be sensitive to lots of tiny but still strong edges. We don't really care about tiny edges composed of a few pixels, so I used Gaussian Blur to smooth them out. [Gaussian Blur](https://en.wikipedia.org/wiki/Gaussian_blur) basically just blurs the image using a kernal of a specified size. I choose a kernal size of 5 after seeing no noticable increase in accuracy beyong that size. 
 
-### 4. Sliding Window Search  
-  
-The code for Sliding window search is contained in the [`finding_lines.py`](finding_lines.py) or [`finding_lines_w.py`](finding_lines.py).  
+### 4. Convert to Binary Image
+This is where a lot of the magic happens. I want to convert the image to a black and white image (each pixel either 0 or 1) where only the lanes (in theory) are white. I use my `ImageClass.format` method to create three grey images. One is just a grayed out version of the normal RGB image, but the other two are the 'l' and 's' channels of an 'hls' formatted version of the image. These are the 'lightness' and 'saturation' channels. Both do a good job at identifying certain types of lane lines.
+(NOTE: In the binary_warp code, conversion from rgb to grey is done autimatically by dir_threshold, and mag_thresh functions)
 
-In the video, we could predict the position of lane lines by checking previous frame's information. But we need an other method for a first frame.  
+<p align="center'>
+  <p align="left">
+      <img src="output_images/Lchannel.png?raw=true" width="300" alt="L channel" /><br>
+  </p>  
+  <p align="right">
+      <img src="output_images/Schannel.png?raw=true" width="300" alt="S channel" /><br>
+  </p>  
+</p>
 
-In my code, if the frame is first frame or lost lane position, found first window position using histogram. Just accumulated non-zero pixels along the columns in the lower 2/3 of the image.  
+I then create two new images (`dir_thresh` and `mag_thresh`) with by taking the directional magnitude and straight magnitude of the gray image.
 
-<p align="center">
-    <img src="images/histogram.jpg" width="320" alt="hist" /><br>
-</p>  
+
   
   
 In the course, we estimated curve line by using all non-zero pixels of windows. Non-zero piexels include **color information** and **gradient information** in bird's eyes view binary image. It works well in [`project_video`](project_video.mp4).  
