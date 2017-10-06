@@ -87,45 +87,37 @@ After correcting for any camera distorion I want to make the image a little more
 This is where a lot of the magic happens. I want to convert the image to a black and white image (each pixel either 0 or 1) where only the lanes (in theory) are white. I use my `ImageClass.format` method to create three grey images. One is just a grayed out version of the normal RGB image, but the other two are the 'l' and 's' channels of an 'hls' formatted version of the image. These are the 'lightness' and 'saturation' channels. Both do a good job at identifying certain types of lane lines.
 (NOTE: In the binary_warp code, conversion from rgb to grey is done autimatically by dir_threshold, and mag_thresh functions)
 
-<p align="center'>
-  <p align="left">
-      <img src="output_images/Lchannel.png?raw=true" width="300" alt="L channel" /><br>
-  </p>  
-  <p align="right">
-      <img src="output_images/Schannel.png?raw=true" width="300" alt="S channel" /><br>
-  </p>  
+
+<p align="center">
+    <img src="output_images/Lchannel.png?raw=true" width="300" alt="L channel" /><br>
+</p>  
+<p align="center">
+    <img src="output_images/Schannel.png?raw=true" width="300" alt="S channel" /><br>
 </p>
 
-I then create two new images (`dir_thresh` and `mag_thresh`) with by taking the directional magnitude and straight magnitude of the gray image.
 
+I then create two new images (`dir_thresh` and `mag_thresh`) with by taking the directional magnitude and gradient magnitude of the gray image. Both of these operations use the sobel function.
 
-  
-  
-In the course, we estimated curve line by using all non-zero pixels of windows. Non-zero piexels include **color information** and **gradient information** in bird's eyes view binary image. It works well in [`project_video`](project_video.mp4).  
-
-**But it has a problem.**  
-  
 <p align="center">
-    <img src="images/nonzero.jpg" width="480" alt="nonzero" /><br>
+    <img src="output_images/DirectionalMagnitude.png?raw=true" width="300" alt="directional magnitude" /><br>
 </p>  
-  
-This is one frame of [`challenge_video`](challenge_video.mp4).  
-In this image, there are some cracks and dark trails near the lane lines. Let's check the result.  
-
-If we fit curve lines with non-zero pixels, the result is here.
 <p align="center">
-    <img src="images/nonzero2.jpg" width="640" alt="nonzero2" /><br>
-</p> 
+    <img src="output_images/GradientMagnitude.png?raw=true" width="300" alt="gradient magnitude" /><br>
+</p>
 
-As you can see, we couldn't detect exact lane positions. Because our gradient information have cracks information and it occurs error of position.  
+After that I use the sobel operation to create 3 new images. The sobel function computes the gradient of change in an image along either the 'x' or 'y' axis. sobel 'x' of 'l' channel image, sobel 'x' of 's' channel image, and sobel 'y' of 's' channel image.
 
-So, I used **`weighted average`** method.
-I put **0.8** weight value to color information and **0.2** to gradient information. And calculated x-average by using weighted average in the window. 
-This is the result.  
 <p align="center">
-    <img src="images/weight.jpg" width="640" alt="weight" /><br>
+    <img src="output_images/Sobelx_L_channel.png?raw=true" width="300" alt="sobel along 'x' axis with 'l' channel" /><br>
 </p>  
-  
+<p align="center">
+    <img src="output_images/Sobelx_S_channel.png?raw=true" width="300" alt="sobel along 'x' axis with 's' channel" /><br>
+</p>
+<p align="center">
+    <img src="output_images/Sobely_S_channel.png?raw=true" width="300" alt="sobel along 'y' axis with 's' channel" /><br>
+</p>
+
+
 
 ### 5. Road information  
   
