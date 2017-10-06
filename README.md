@@ -2,7 +2,7 @@
   
   
 <p align="center">
-    <img src="output_images/Output.jpg" width="480" alt="main_image" /><br>
+    ![Alt text](output_images/result.jpg?raw=true "result")
     <b>Example result</b><br>
 </p>
 
