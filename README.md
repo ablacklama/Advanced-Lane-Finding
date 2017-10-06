@@ -126,23 +126,28 @@ Then I had to combine them all back into one image. I used a series of binary an
 Then I combined `sx` and `sy` with an 'and' opperation to create `sxy`, that image and `lx` were then combine with the 'or' opperation to create `lsxy`. 
 
 <p align="center">
-    <img src="output_images/GradDirMag.png?raw=true" width="300" alt="combined gradient and directional magnitude" /><br>
+    <img src="output_images/Combined_Sobel.png?raw=true" width="300" alt="sxy" /><br>
 </p>
 <p align="center">
-    <img src="output_images/GradDirMag.png?raw=true" width="300" alt="combined gradient and directional magnitude" /><br>
+    <img src="output_images/lsxy.png?raw=true" width="300" alt="lsxy" /><br>
 </p>
 
 Finally I merge `magdir` and `lsxy` to with the `or` opperation to create the `both` image which is then cropped down to a `ROI` or region of interest.
 
+<p align="center">
+    <img src="output_images/both.png?raw=true" width="300" alt="both" /><br>
+</p>
+<p align="center">
+    <img src="output_images/ROI.png?raw=true" width="300" alt="ROI" /><br>
+</p>
 
-
-### 5. Road information  
+### 5. Perspective Transformation 
   
 <p align="center">
-    <img src="images/road_info.jpg" width="480" alt="road_info" /><br>
+    <img src="output_images/Warped_Perspective.png?raw=true" width="480" alt="perspective warp" /><br>
 </p>  
   
-In my output video, I included some road informations.
+Here I use my `transform` function and openCV's `getPerspectiveTransform` to change the perspective of the image to top down. This makes finding the lines and calculating the curvature much easier.
 
 #### Lane Info
 * estimate lane status that is a straight line, or left/right curve. To decide this, I considered a radius of curvature and a curve direction.  
