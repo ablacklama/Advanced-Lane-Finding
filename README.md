@@ -1,7 +1,7 @@
 # Advanced Lane Finding Project  
   
 <p align="center">
-    <img src="https://github.com/ablacklama/Advanced-Lane-Finding/blob/master/output_images/Output.png?raw=true" width="640" alt="calib_image" /><br>    
+    <img src="https://github.com/ablacklama/Advanced-Lane-Finding/blob/master/output_images/example.png?raw=true" width="640" alt="calib_image" /><br>    
 </p> 
 
 
