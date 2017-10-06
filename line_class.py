@@ -1,9 +1,6 @@
 import numpy as np
 
 
-
-
-
 class Line():
     def __init__(self):
         # was the line detected in the last iteration?
@@ -70,8 +67,8 @@ class Line():
 
             lowestx = allx[np.argmax(ally)]
 
+            #keep n_lines amount of previus fits and use them to help compute the best fit
             self.recent_xfitted.append(lowestx)
-
             if (len(self.recent_xfitted) > n_lines):
                 self.recent_xfitted = self.recent_xfitted[-n_lines:]
             self.bestx = np.average(self.recent_xfitted)
@@ -79,13 +76,6 @@ class Line():
             xm_per_pix = 3.7 / 700  # meters per pixel in x dimension
             offset = middle - self.bestx
             self.line_base_pos = offset * xm_per_pix
-
-
-
-
-
-
-
 
 
 
