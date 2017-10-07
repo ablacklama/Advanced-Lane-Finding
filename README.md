@@ -170,10 +170,10 @@ To find the lines I took a histogram of the bottom half of the warped image to s
     <img src="output_images/WindowsLines.png?raw=true" width="480" alt="fitted lines" /><br>
 </p>  
  
- All of this information was saved in a [`line_class.py`](line_class.py) that I used to keep track of all line information. Knowing where the last lines were allowed me to quickly search for them again in the next frame without having to do a windowed search. This speeds up processing considerably, and if you ever don't find a line with this approach, you can always go back to a windowed search.
+ All of this information was saved in a [`line_class.py`](line_class.py) that I used to keep track of all line information. Knowing where the last lines were allowed me to quickly search for them again in the next frame without having to do a windowed search. This speeds up processing considerably, and if you ever don't find a line with this approach, you can always go back to a windowed search. I also have a sanity check written in here that makes sure there are enough points in the line. A line with too few points will probably have an inacurate fit.
  
 ### 7. Computing the Radius of the Curvature 
-I assumed here that the lane I found was roughly 30 Meters in length. Then used their polynomial coefficients to calculated seperate radiuses for each lane.  
+I assumed here that the lane I found was roughly 30 Meters in length. Then used their polynomial coefficients to calculated seperate radiuses for each lane. I also included a sanity check here to make sure the lanes were parallel within a reasonable deviation.
   
 ### 8. Find position of car relative to the lane
 Here used the distance of the center of the car to each lane in pixels as a starting point. Then knowing that a lane is 3.7 meters accross I got the length of every pixel and used it to find how far off center the car was.
