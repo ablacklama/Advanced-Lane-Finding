@@ -39,12 +39,14 @@ class Line():
         #number of frames undetected
         self.num_missed = 0 ###
 
+        self.curve_sanity = True
 
-    def update_fit(self, fit, allx, ally, detected, n_lines):
+
+    def update_fit(self, fit, allx, ally, n_lines):
 
 
         #if there are to few points to rely on or a line wasn't detected
-        if (len(np.unique(ally)) < 280) or not detected:
+        if (len(np.unique(ally)) < 280) or not self.curve_sanity:
             self.num_missed += 1
             if (self.num_missed > 20):
                 self.detected = False
@@ -79,23 +81,35 @@ class Line():
 
 
 
-    def get_radius(self, left_fit, right_fit):
-        ploty = np.linspace(0, 719, num=720)  # to cover same y-range as image
-        y_eval = np.max(ploty)
-        # Define conversions in x and y from pixels space to meters
-        ym_per_pix = 30 / 720  # meters per pixel in y dimension
+    def get_radius(self, r_line, polyfit_left, polyfit_right):
+        self.curve_sanity = True
+        r_line.curve_sanity = True
+        if(type(polyfit_left) != type(None) and type(polyfit_right) != type(None)):
+
+            ploty = np.linspace(0, 719, num=720)  # to cover same y-range as image
+            y_eval = np.max(ploty)
+            # Define conversions in x and y from pixels space to meters
+
+            ym_per_pix = 30 / 720  # meters per pixel in y dimension
+            xm_per_pix = 3.7 / 700  # meters per pixel in x dimension
+
+            leftx = polyfit_left[0] * ploty ** 2 + polyfit_left[1] * ploty + polyfit_left[2]
+            rightx = polyfit_right[0] * ploty ** 2 + polyfit_right[1] * ploty + polyfit_right[2]
+
+            # Fit new polynomials to x,y in world space
+            left_fit_cr = np.polyfit(ploty * ym_per_pix, leftx * xm_per_pix, 2)
+            right_fit_cr = np.polyfit(ploty * ym_per_pix, rightx * xm_per_pix, 2)
+            # Calculate the new radii of curvature
+            left_curverad = ((1 + (
+            2 * left_fit_cr[0] * y_eval * ym_per_pix + left_fit_cr[1]) ** 2) ** 1.5) / np.absolute(2 * left_fit_cr[0])
+            right_curverad = ((1 + (
+            2 * right_fit_cr[0] * y_eval * ym_per_pix + right_fit_cr[1]) ** 2) ** 1.5) / np.absolute(
+                2 * right_fit_cr[0])
 
 
-        # Fit new polynomials to x,y in world space
-        # Calculate the new radii of curvature
-        left_curverad = ((1 + (2 * left_fit[0] * y_eval * ym_per_pix + left_fit[1]) ** 2) ** 1.5) / np.absolute(
-            2 * left_fit[0])
-        right_curverad = (
-                         (1 + (2 * right_fit[0] * y_eval * ym_per_pix + right_fit[1]) ** 2) ** 1.5) / np.absolute(
-            2 * right_fit[0])
+            if(left_curverad / right_curverad) > 2 or (left_curverad / right_curverad) < 0.5:
+                self.curve_sanity = False
+                r_line.curve_sanity = False
 
-        sanity = True
-        if(left_curverad / right_curverad) > 2 or (left_curverad / right_curverad) < 0.5:
-            sanity = False
-
-        return (left_curverad, right_curverad, sanity)
+            return (left_curverad, right_curverad)
+        return (0,0)

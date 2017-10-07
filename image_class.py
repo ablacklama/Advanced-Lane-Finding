@@ -11,21 +11,22 @@ class ImageClass:
             form = 'rgb'
         self.img = img
         self.form = form
+        self.shape = 0
 
     # lets an instance of the class be interpreted as an array
     def __array__(self):
-        return self.img
+        return np.array(self.img)
+    def __getitem__(self,key):
+        return self.img[key]
 
-    def __repr__(self):
-        return repr([self.img])
-
+    #undisort an image using the distortion matrixes
     def undistort(self, mtx, dist):
         img = self.img
         dst = cv2.undistort(img, mtx, dist, None, mtx)
 
         return ImageClass(dst, form=self.form)
 
-    # display an image
+    # display an image with a title
     def imshow(self, title=None,):
         img=self.img
         plt.figure()
@@ -296,7 +297,9 @@ class ImageClass:
             sx.imshow('sx')
             sy.imshow('sy')
             sxy.imshow('sxy')
-            both.imshow('all combined')
+            lsxy.imshow('lsxy')
+            both.imshow('both')
+            crop.imshow('ROI')
             binary_warped.imshow('result')
 
         return binary_warped, Minv
