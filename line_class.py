@@ -24,9 +24,6 @@ class Line():
         #radius of curvature of the line in some units
         self.radius_of_curvature = None
 
-        #distance in meters of vehicle center from the line
-        self.line_base_pos = None ###
-
         #difference in fit coefficients between last and new fits
         self.diffs = np.array([0,0,0], dtype='float')
 
@@ -54,7 +51,7 @@ class Line():
 
         #if everything was normal and a line was detected
         else:
-            middle = 640
+
             self.num_missed = 0
             self.detected = True
             self.current_fit = np.array(fit)
@@ -75,9 +72,8 @@ class Line():
                 self.recent_xfitted = self.recent_xfitted[-n_lines:]
             self.bestx = np.average(self.recent_xfitted)
 
-            xm_per_pix = 3.7 / 700  # meters per pixel in x dimension
-            offset = middle - self.bestx
-            self.line_base_pos = offset * xm_per_pix
+
+
 
 
 
@@ -91,7 +87,7 @@ class Line():
             # Define conversions in x and y from pixels space to meters
 
             ym_per_pix = 30 / 720  # meters per pixel in y dimension
-            xm_per_pix = 3.7 / 700  # meters per pixel in x dimension
+            xm_per_pix = 3.7 / 600  # meters per pixel in x dimension
 
             leftx = polyfit_left[0] * ploty ** 2 + polyfit_left[1] * ploty + polyfit_left[2]
             rightx = polyfit_right[0] * ploty ** 2 + polyfit_right[1] * ploty + polyfit_right[2]
@@ -106,10 +102,15 @@ class Line():
             2 * right_fit_cr[0] * y_eval * ym_per_pix + right_fit_cr[1]) ** 2) ** 1.5) / np.absolute(
                 2 * right_fit_cr[0])
 
+            middle = 640
+            l_base_pos = 720 * polyfit_left[0] ** 2 + 720 * polyfit_left[1] + polyfit_left[2]
+            r_base_pos = 720 * polyfit_right[0] ** 2 + 720 * polyfit_right[1] + polyfit_right[2]
+            lane_center = (r_base_pos + l_base_pos)/2
+            offset = (middle - lane_center) * xm_per_pix
 
             if(left_curverad / right_curverad) > 2 or (left_curverad / right_curverad) < 0.5:
                 self.curve_sanity = False
                 r_line.curve_sanity = False
 
-            return (left_curverad, right_curverad)
+            return (left_curverad, right_curverad, offset)
         return (0,0)
